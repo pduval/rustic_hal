@@ -45,6 +45,9 @@ hal_res.add_link("self", "/api/myresource/0");
 println!("json representation: {}", to_json(hal_res));
 
 ```
+## Documentation
+
+see [https://pduval.github.io/rustic_hal/rustic_hal/](https://pduval.github.io/rustic_hal/rustic_hal/) for the cargo-doc pages.
 
 ## Credits
 
