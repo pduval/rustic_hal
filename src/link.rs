@@ -1,4 +1,8 @@
-use serde::{Serialize, Serializer};
+use serde::{Serialize, Serializer, Deserialize, Deserializer};
+use serde::de;
+use std::ops::Deref;
+use std::convert::{From,Into};
+
 /// A Link object for linking HAL Resources.
 ///
 /// The link represents a related resource.
@@ -6,12 +10,12 @@ use serde::{Serialize, Serializer};
 ///
 /// # Examples
 ///
-/// ```
+/// ```rust
 /// use rustic_hal::HalLink;
 ///
 /// let link = HalLink::new("http://sowewhere.com");
 /// ```
-#[derive(Deserialize, Clone)]
+#[derive(Clone, Debug)]
 pub struct HalLink {
     /// The "href" property is REQUIRED.
     ///
@@ -72,7 +76,7 @@ pub struct HalLink {
 
 macro_rules! chainable_string {
     ($x: ident, $y: ident) => {
-        pub fn $y(&mut self, $x: &str) -> &mut Self {
+        pub fn $y(mut self, $x: &str) -> Self {
             self.$x = Some($x.to_string());
             self
         }
@@ -84,9 +88,9 @@ macro_rules! chainable_string {
 }
 
 impl HalLink {
-    pub fn new(href: &str) -> HalLink {
+    pub fn new<S>(href: S) -> HalLink where S: Into<String> {
         HalLink {
-            href: href.to_string(),
+            href: href.into(),
             templated: false,
             media_type: None,
             deprecation: None,
@@ -97,7 +101,7 @@ impl HalLink {
         }
     }
 
-    pub fn templated(&mut self, templated: bool) -> &mut Self {
+    pub fn templated(mut self, templated: bool) -> Self {
         self.templated = templated;
         self
     }
@@ -109,6 +113,14 @@ impl HalLink {
     chainable_string!(title, with_title);
     chainable_string!(hreflang, with_hreflang);
     
+}
+
+impl<T> From<T> for HalLink
+    where T: Into<String>
+{
+    fn from(s: T) -> Self {
+        HalLink::new(s)
+    }
 }
 
 impl Serialize for HalLink {
@@ -141,48 +153,91 @@ impl Serialize for HalLink {
         let mut state = try!(serializer.serialize_map(Some(len)));
         try!(serializer.serialize_map_key(&mut state, "href"));
         try!(serializer.serialize_map_value(&mut state, &self.href));
-        match self.media_type {
-            Some(ref s) => {
-                try!(serializer.serialize_map_key(&mut state, "type"));
-                try!(serializer.serialize_map_value(&mut state, s));
-            },
-            None => ()
+        if self.templated {
+            try!(serializer.serialize_map_key(&mut state, "templated"));
+            try!(serializer.serialize_map_value(&mut state, true));
+        }
+        if let Some(ref s) =  self.media_type {
+            try!(serializer.serialize_map_key(&mut state, "type"));
+            try!(serializer.serialize_map_value(&mut state, s));
         };
-        match self.deprecation {
-            Some(ref s) => {
-                try!(serializer.serialize_map_key(&mut state, "deprecation"));
-                try!(serializer.serialize_map_value(&mut state, s));
-            },
-            None => ()
+        if let Some(ref s) = self.deprecation {
+            try!(serializer.serialize_map_key(&mut state, "deprecation"));
+            try!(serializer.serialize_map_value(&mut state, s));
         };
-        match self.profile {
-            Some(ref s) => {
-                try!(serializer.serialize_map_key(&mut state, "profile"));
-                try!(serializer.serialize_map_value(&mut state, s));
-            },
-            None => ()
+        if let Some(ref s) = self.profile {
+            try!(serializer.serialize_map_key(&mut state, "profile"));
+            try!(serializer.serialize_map_value(&mut state, s));
         };
-        match self.name {
-            Some(ref s) => {
-                try!(serializer.serialize_map_key(&mut state, "name"));
-                try!(serializer.serialize_map_value(&mut state, s));
-            },
-            None => ()
+        if let Some(ref s) = self.name {
+            try!(serializer.serialize_map_key(&mut state, "name"));
+            try!(serializer.serialize_map_value(&mut state, s));
         };
-        match self.title {
-            Some(ref s) => {
-                try!(serializer.serialize_map_key(&mut state, "title"));
-                try!(serializer.serialize_map_value(&mut state, s));
-            },
-            None => ()
+        if let Some(ref s) = self.title {
+            try!(serializer.serialize_map_key(&mut state, "title"));
+            try!(serializer.serialize_map_value(&mut state, s));
         };
-        match self.hreflang {
-            Some(ref s) => {
-                try!(serializer.serialize_map_key(&mut state, "hreflang"));
-                try!(serializer.serialize_map_value(&mut state, s));
-            },
-            None => ()
+        if let Some(ref s) =  self.hreflang {
+            try!(serializer.serialize_map_key(&mut state, "hreflang"));
+            try!(serializer.serialize_map_value(&mut state, s));
         };
         serializer.serialize_map_end(state)
+    }
+}
+
+
+impl Deserialize for HalLink {
+
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+        where D: Deserializer {
+
+        struct LinkVisitor;
+        impl LinkVisitor {
+            fn new() -> Self {
+                LinkVisitor {}
+            }
+        }
+        /// A visitor for deserializing `HalLink` from map representation, ignoring unknown keys,
+        /// and allowing missing fields.
+        impl de::Visitor for LinkVisitor {
+
+            type Value = HalLink;
+            
+            fn visit_map<M>(&mut self, mut visitor: M) -> Result<HalLink, M::Error>
+                where M: de::MapVisitor
+            {
+                let mut link = HalLink::new("");
+                while let Some (key) = try!(visitor.visit_key::<String>()) {
+                    if key.deref() == "templated" {
+                        link.templated = try!(visitor.visit_value());
+                    } else {
+                        let value = try!(visitor.visit_value::<String>());
+                        match key.deref() {
+                            "href" => link.href = value,
+                            "type" => link.media_type = Some(value),
+                            "deprecation" => link.deprecation = Some(value),
+                            "profile" => link.profile = Some(value),
+                            "name" => link.name = Some(value),
+                            "title" =>link.title = Some(value),
+                            "hreflang" => link.hreflang = Some(value),
+                            &_ => ()
+                        }
+                    }
+                };
+                try!(visitor.end());
+                Ok(link)
+            }
+        }
+
+
+        deserializer.deserialize_map(LinkVisitor::new())
+    }
+}
+
+/// Two links are the same if their href is the same
+/// The rest is immaterial
+impl PartialEq for HalLink {
+    fn eq(&self, other: &HalLink) -> bool {
+        self.href == other.href
     }
 }
