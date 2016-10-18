@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["HalLink","A Link object for linking HAL Resources."]]});

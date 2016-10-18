@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["HalResource","The HAL Resource structure."],["OneOrMany","A Simple wrapper around a vector to allow custom serialization when only 1 element is contained."]]});
