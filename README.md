@@ -8,12 +8,14 @@ A simple library for serializing (and deserializing coming soon) resources follo
 
 ## Usage
 
+### On nightly rust
+
 Add the dependency to your Cargo.toml:
 
 ```toml
 
 [dependencies]
-rustic_hal="0.0.1"
+rustic_hal="0.1.0"
 serde="0.8"
 serde_json="0.8"
 serde_derive="0.8"
