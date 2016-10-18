@@ -2,6 +2,10 @@
 
 A simple library for serializing (and deserializing coming soon) resources following the [HAL Spec](https://tools.ietf.org/html/draft-kelly-json-hal-08)
 
+[![Clippy Linting Result](https://clippy.bashy.io/github/pduval/rustic_hal/master/badge.svg)](https://clippy.bashy.io/github/pduval/rustic_hal/master/log)
+[![Build Status](https://travis-ci.org/pduval/rustic_hal.svg)](https://travis-ci.org/pduval/rustic_hal)
+[![](http://meritbadge.herokuapp.com/rustic_hal)](https://crates.io/crates/rustic_hal)
+
 ## Usage
 
 Add the dependency to your Cargo.toml:

@@ -1,11 +1,7 @@
 use super::super::resource::*;
 use serde_json::{to_string, from_str};
 use super::super::HalLink;
-
-#[derive(Serialize, Deserialize)]
-struct Test1 {
-    a: String
-}
+use super::Test1;
 
 #[test]
 fn check_data_gets_serialized() {
