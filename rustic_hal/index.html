@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-0' class='srclink' href='../src/rustic_hal/src/lib.rs.html#1-59' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-0' class='srclink' href='../src/rustic_hal/src/lib.rs.html#1-63' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'>
 <h1 id='rustic-hal' class='section-header'><a href='#rustic-hal'>Rustic Hal</a></h1>
 <p>A simple library for serializing (and deserializing coming soon) resources following the <a href="https://tools.ietf.org/html/draft-kelly-json-hal-08">HAL Spec</a></p>
@@ -68,34 +68,41 @@ serde_derive=&quot;0.8&quot;
 <p>and to use:</p>
 
 <pre class='rust rust-example-rendered'>
- 
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>custom_derive</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rustic_hal</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde_json</span>;
  
 <span class='kw'>use</span> <span class='ident'>rustic_hal</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>serde</span>::<span class='ident'>Serialize</span>;
-<span class='kw'>use</span> <span class='ident'>serde_json</span>::<span class='ident'>to_json</span>;
+<span class='kw'>use</span> <span class='ident'>serde_json</span>::<span class='ident'>to_string</span>;
  
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Serialize</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MyResource</span> {
-    <span class='kw'>pub</span> <span class='ident'>test</span>: <span class='ident'>String</span>;
+    <span class='kw'>pub</span> <span class='ident'>test</span>: <span class='ident'>String</span>
 }
- 
+
 <span class='kw'>let</span> <span class='ident'>mr</span> <span class='op'>=</span> <span class='ident'>MyResource</span> { <span class='ident'>test</span>: <span class='string'>&quot;Hello, World!&quot;</span>.<span class='ident'>to_string</span>() };
 <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>hal_res</span> <span class='op'>=</span> <span class='ident'>HalResource</span>::<span class='ident'>new</span>(<span class='ident'>mr</span>);
-<span class='ident'>hal_res</span>.<span class='ident'>add_link</span>(<span class='string'>&quot;self&quot;</span>, <span class='string'>&quot;/api/myresource/0&quot;</span>);
+<span class='ident'>hal_res</span>.<span class='ident'>with_link</span>(<span class='string'>&quot;self&quot;</span>, <span class='string'>&quot;/api/myresource/0&quot;</span>);
  
-<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;json representation: {}&quot;</span>, <span class='ident'>to_json</span>(<span class='ident'>hal_res</span>));
- <a class='test-arrow' target='_blank' href=''>Run</a></pre>
+<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;json representation: {}&quot;</span>, <span class='ident'>to_string</span>(<span class='kw-2'>&amp;</span><span class='ident'>hal_res</span>).<span class='ident'>unwrap</span>());
+<a class='test-arrow' target='_blank' href=''>Run</a></pre>
 
 <h2 id='credits' class='section-header'><a href='#credits'>Credits</a></h2>
 <p>This library is heavily inspired by (read copied from) the <a href="https://github.com/hjr3/hal-rs">hal-rs</a> library by Herman J. Radtke III.</p>
 </div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
 <table><tr><td><code>pub use self::<a class='mod'
                                        href='./resource/index.html'>resource</a>::<a class='struct' href='../rustic_hal/resource/struct.HalResource.html' title='rustic_hal::resource::HalResource'>HalResource</a>;</code></td></tr><tr><td><code>pub use self::<a class='mod'
-                                       href='./link/index.html'>link</a>::<a class='struct' href='../rustic_hal/link/struct.HalLink.html' title='rustic_hal::link::HalLink'>HalLink</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+                                       href='./link/index.html'>link</a>::<a class='struct' href='../rustic_hal/link/struct.HalLink.html' title='rustic_hal::link::HalLink'>HalLink</a>;</code></td></tr><tr><td><code>pub use self::error::{<a class='enum' href='../rustic_hal/error/enum.HalError.html' title='rustic_hal::error::HalError'>HalError</a>, <a class='type' href='../rustic_hal/error/type.HalResult.html' title='rustic_hal::error::HalResult'>HalResult</a>};</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='error/index.html'
+                                  title='rustic_hal::error'>error</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='link/index.html'
                                   title='rustic_hal::link'>link</a></td>

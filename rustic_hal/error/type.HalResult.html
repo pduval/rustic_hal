@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `resource` mod in crate `rustic_hal`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, resource">
+    <meta name="description" content="API documentation for the Rust `HalResult` type in crate `rustic_hal`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, HalResult">
 
-    <title>rustic_hal::resource - Rust</title>
+    <title>rustic_hal::error::HalResult - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -28,7 +28,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>rustic_hal</a></p><script>window.sidebarCurrent = {name: 'resource', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+        <p class='location'><a href='../index.html'>rustic_hal</a>::<wbr><a href='index.html'>error</a></p><script>window.sidebarCurrent = {name: 'HalResult', ty: 'type', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -42,29 +42,13 @@
         </form>
     </nav>
 
-    <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>rustic_hal</a>::<wbr><a class='mod' href=''>resource</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content type">
+<h1 class='fqn'><span class='in-band'>Type Definition <a href='../index.html'>rustic_hal</a>::<wbr><a href='index.html'>error</a>::<wbr><a class='type' href=''>HalResult</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-6' class='srclink' href='../../src/rustic_hal/src/resource.rs.html#1-361' title='goto source code'>[src]</a></span></h1>
-<h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class='struct' href='struct.HalResource.html'
-                                  title='rustic_hal::resource::HalResource'>HalResource</a></td>
-                           <td class='docblock-short'>
-                                <p>The HAL Resource structure.</p>
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class='struct' href='struct.OneOrMany.html'
-                                  title='rustic_hal::resource::OneOrMany'>OneOrMany</a></td>
-                           <td class='docblock-short'>
-                                <p>A Simple wrapper around a vector to allow custom
-serialization when only 1 element is contained.</p>
-                           </td>
-                       </tr></table></section>
+               </span><a id='src-202' class='srclink' href='../../src/rustic_hal/src/error.rs.html#11' title='goto source code'>[src]</a></span></h1>
+<pre class='rust typedef'>type HalResult&lt;T&gt; = <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='enum' href='../../rustic_hal/error/enum.HalError.html' title='rustic_hal::error::HalError'>HalError</a>&gt;;</pre></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>

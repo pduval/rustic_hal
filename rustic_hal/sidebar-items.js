@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["link",""],["resource",""]]});
+initSidebarItems({"mod":[["error",""],["link",""],["resource",""]]});
