@@ -18,12 +18,12 @@
 //! 
 //! ```
 //! and to use:
-//! 
-//! ```rust
-//! #![feature(custom_derive)]
+//!
+// TODO: Figure out why rustdoc can't handle the derive(Serialize) attribute
+//! ```rust,ignore
 //! extern crate rustic_hal;
-//! extern crate serde;
 //! extern crate serde_json;
+//! #[macro_use] extern crate serde;
 //! 
 //! use rustic_hal::*;
 //! use serde::Serialize;
