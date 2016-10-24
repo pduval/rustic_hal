@@ -46,8 +46,9 @@
 //! 
 //! ## Credits
 //! 
-//! This library is heavily inspired by (read copied from) the [hal-rs](https://github.com/hjr3/hal-rs) library by Herman J. Radtke III.
+//! This library is heavily inspired by the [hal-rs](https://github.com/hjr3/hal-rs) library by Herman J. Radtke III.
 //! 
+
 extern crate serde_json;
 #[macro_use] extern crate serde;
 

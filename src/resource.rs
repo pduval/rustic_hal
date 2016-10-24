@@ -247,7 +247,7 @@ impl HalResource {
         where V: Deserialize {
         let data = match self.data {
             JsonValue::Object(ref m) => m,
-            _ => return Err(HalError::Custom(format!("Invalid payload")))
+            _ => return Err(HalError::Custom("Invalid payload".to_string()))
         };
         match data.get(name) {
             Some(v) => {
@@ -273,7 +273,7 @@ impl Serialize for HalResource {
             _ => None
         };
         let mut length = match map {
-            Some(ref m) => m.len(),
+            Some(m) => m.len(),
             _ => 0
         };
         length += self.links.len();
