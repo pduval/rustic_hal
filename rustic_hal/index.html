@@ -68,10 +68,9 @@ serde_derive=&quot;0.8&quot;
 <p>and to use:</p>
 
 <pre class='rust rust-example-rendered'>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>custom_derive</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rustic_hal</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde_json</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde</span>;
  
 <span class='kw'>use</span> <span class='ident'>rustic_hal</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>serde</span>::<span class='ident'>Serialize</span>;

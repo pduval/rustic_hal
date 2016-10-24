@@ -127,12 +127,12 @@
 <span class='doccomment'>//! </span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//! and to use:</span>
-<span class='doccomment'>//! </span>
-<span class='doccomment'>//! ```rust</span>
-<span class='doccomment'>//! #![feature(custom_derive)]</span>
+<span class='doccomment'>//!</span>
+<span class='comment'>// TODO: Figure out why rustdoc can&#39;t handle the derive(Serialize) attribute</span>
+<span class='doccomment'>//! ```rust,ignore</span>
 <span class='doccomment'>//! extern crate rustic_hal;</span>
-<span class='doccomment'>//! extern crate serde;</span>
 <span class='doccomment'>//! extern crate serde_json;</span>
+<span class='doccomment'>//! #[macro_use] extern crate serde;</span>
 <span class='doccomment'>//! </span>
 <span class='doccomment'>//! use rustic_hal::*;</span>
 <span class='doccomment'>//! use serde::Serialize;</span>
