@@ -8,7 +8,7 @@ A simple library for serializing (and deserializing coming soon) resources follo
 
 ## Usage
 
-### On nightly rust
+### On stable rust (>= 1.15)
 
 Add the dependency to your Cargo.toml:
 
