@@ -9,6 +9,7 @@
 
     <title>unicode_xid::UnicodeXID - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
     
@@ -16,7 +17,7 @@
     <link rel="shortcut icon" href="https://unicode-rs.github.io/unicode-rs_sm.png">
     
 </head>
-<body class="rustdoc">
+<body class="rustdoc trait">
     <!--[if lte IE 8]>
     <div class="warning">
         This old browser is unsupported and will most likely display funky
@@ -28,7 +29,7 @@
 
     <nav class="sidebar">
         <a href='../unicode_xid/index.html'><img src='https://unicode-rs.github.io/unicode-rs_sm.png' alt='logo' width='100'></a>
-        <p class='location'><a href='index.html'>unicode_xid</a></p><script>window.sidebarCurrent = {name: 'UnicodeXID', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'>Trait UnicodeXID</p><div class="block items"><ul><li><a href="#required-methods">Required Methods</a></li><li><a href="#implementors">Implementors</a></li></ul></div><p class='location'><a href='index.html'>unicode_xid</a></p><script>window.sidebarCurrent = {name: 'UnicodeXID', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -42,26 +43,26 @@
         </form>
     </nav>
 
-    <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>unicode_xid</a>::<wbr><a class='trait' href=''>UnicodeXID</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>unicode_xid</a>::<wbr><a class="trait" href=''>UnicodeXID</a></span><span class='out-of-band'><span id='render-detail'>
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-22' class='srclink' href='../src/unicode_xid/lib.rs.html#65-81' title='goto source code'>[src]</a></span></h1>
+               </span><a class='srclink' href='../src/unicode_xid/lib.rs.html#63-79' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait UnicodeXID {
-    fn <a href='#tymethod.is_xid_start' class='fnname'>is_xid_start</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
-    fn <a href='#tymethod.is_xid_continue' class='fnname'>is_xid_continue</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.is_xid_start' class='fnname'>is_xid_start</a>(self) -&gt; bool;
+    fn <a href='#tymethod.is_xid_continue' class='fnname'>is_xid_continue</a>(self) -&gt; bool;
 }</pre><div class='docblock'><p>Methods for determining if a character is a valid identifier character.</p>
 </div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
-        <h3 id='tymethod.is_xid_start' class='method stab '><span id='is_xid_start.v' class='invisible'><code>fn <a href='#tymethod.is_xid_start' class='fnname'>is_xid_start</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><div class='docblock'><p>Returns whether the specified character satisfies the &#39;XID_Start&#39;
+        <h3 id='tymethod.is_xid_start' class='method'><span id='is_xid_start.v' class='invisible'><code>fn <a href='#tymethod.is_xid_start' class='fnname'>is_xid_start</a>(self) -&gt; bool</code></span></h3><div class='docblock'><p>Returns whether the specified character satisfies the &#39;XID_Start&#39;
 Unicode property.</p>
 
 <p>&#39;XID_Start&#39; is a Unicode Derived Property specified in
 <a href="http://unicode.org/reports/tr31/#NFKC_Modifications">UAX #31</a>,
 mostly similar to ID_Start but modified for closure under NFKx.</p>
-</div><h3 id='tymethod.is_xid_continue' class='method stab '><span id='is_xid_continue.v' class='invisible'><code>fn <a href='#tymethod.is_xid_continue' class='fnname'>is_xid_continue</a>(self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><div class='docblock'><p>Returns whether the specified <code>char</code> satisfies the &#39;XID_Continue&#39;
+</div><h3 id='tymethod.is_xid_continue' class='method'><span id='is_xid_continue.v' class='invisible'><code>fn <a href='#tymethod.is_xid_continue' class='fnname'>is_xid_continue</a>(self) -&gt; bool</code></span></h3><div class='docblock'><p>Returns whether the specified <code>char</code> satisfies the &#39;XID_Continue&#39;
 Unicode property.</p>
 
 <p>&#39;XID_Continue&#39; is a Unicode Derived Property specified in
@@ -70,7 +71,7 @@ mostly similar to &#39;ID_Continue&#39; but modified for closure under NFKx.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
-    <li><code>impl UnicodeXID for <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a></code></li>
+    <li><code>impl UnicodeXID for char</code></li>
 </ul><script type="text/javascript" async
                          src="../implementors/unicode_xid/trait.UnicodeXID.js">
                  </script></section>
@@ -129,11 +130,8 @@ mostly similar to &#39;ID_Continue&#39; but modified for closure under NFKx.</p>
     <script>
         window.rootPath = "../";
         window.currentCrate = "unicode_xid";
-        window.playgroundUrl = "";
     </script>
-    <script src="../jquery.js"></script>
     <script src="../main.js"></script>
-    <script src="../extra.js"></script>
     <script defer src="../search-index.js"></script>
 </body>
 </html>
