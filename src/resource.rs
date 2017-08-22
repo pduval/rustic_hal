@@ -2,10 +2,12 @@ use std::collections::*;
 use std::collections::btree_map::Entry;
 use std::vec::*;
 use std::ops::Deref;
+use std::fmt::{Formatter,Error as FmtError};
 
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 use serde::de;
-use serde::Error;
+use serde::de::Error;
+use serde::ser::SerializeMap;
 //use serde::de::Deserialize;
 use serde_json::{Value as JsonValue, to_value, from_value, Map};
 use super::link::{HalLink};
@@ -55,7 +57,7 @@ impl<T> OneOrMany<T> where T:Clone {
         self.force_many = true;
         self
     }
-    
+
     /// retrieve the length of the wrapped vector
     pub fn len(&self) -> usize {
         self.content.len()
@@ -88,7 +90,7 @@ impl<T> OneOrMany<T> where T:Clone {
 }
 
 impl<T> Serialize for OneOrMany<T> where T:Serialize+Clone {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
         if self.is_empty() {
@@ -98,16 +100,16 @@ impl<T> Serialize for OneOrMany<T> where T:Serialize+Clone {
         } else {
             self.content.serialize(serializer)
         }
-            
+
     }
 }
 
-impl<T> Deserialize for OneOrMany<T> where T:Deserialize+Clone {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: Deserializer
+impl<'de,T> Deserialize<'de> for OneOrMany<T> where for<'d> T:Deserialize<'d>+Clone {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>
     {
 
-       
+
         let value: JsonValue = try!(Deserialize::deserialize(deserializer));
         let v2 = value.clone();
         match v2 {
@@ -132,7 +134,7 @@ impl<T> Deserialize for OneOrMany<T> where T:Deserialize+Clone {
             _ => Ok(OneOrMany::new())
         }
     }
-    
+
 }
 
 /// The HAL Resource structure.
@@ -160,7 +162,7 @@ impl HalResource {
             links: BTreeMap::new(),
             embedded: BTreeMap::new(),
             curies: BTreeMap::new(),
-            data: to_value(payload)
+            data: to_value(payload).unwrap()
         }
     }
 
@@ -172,7 +174,7 @@ impl HalResource {
         match self.links.entry(lk_name.clone()) {
             Entry::Vacant(entry) => {
                 let mut lk = OneOrMany::new();
-                
+
                 if lk_name == "curies" {
                     lk.force_many();
                 }
@@ -232,11 +234,11 @@ impl HalResource {
     pub fn with_extra_data<V>(&mut self, name: &str, value: V) -> &mut Self  where V: Serialize{
         match self.data {
             JsonValue::Object(ref mut m) => {
-                m.insert(name.to_string(), to_value(value));
+                m.insert(name.to_string(), to_value(value).unwrap());
             },
             _ => {
                 let mut data = Map::<String, JsonValue>::new();
-                data.insert(name.to_string(), to_value(value));
+                data.insert(name.to_string(), to_value(value).unwrap());
                 self.data = JsonValue::Object(data);
             }
         };
@@ -244,7 +246,7 @@ impl HalResource {
     }
 
     pub fn get_extra_data<V>(&self, name: &str) -> HalResult<V>
-        where V: Deserialize {
+        where for<'de> V: Deserialize<'de> {
         let data = match self.data {
             JsonValue::Object(ref m) => m,
             _ => return Err(HalError::Custom("Invalid payload".to_string()))
@@ -258,13 +260,13 @@ impl HalResource {
     }
 
     pub fn get_data<V>(&self) -> HalResult<V>
-        where V: Deserialize {
+        where for <'de> V: Deserialize<'de> {
         from_value::<V>(self.data.clone()).or_else(|e| { Err(HalError::Json(e)) })
     }
 }
 
 impl Serialize for HalResource {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
 
@@ -278,71 +280,75 @@ impl Serialize for HalResource {
         };
         length += self.links.len();
         length += self.embedded.len();
-        
+
         let mut state = try!(serializer.serialize_map(Some(length) ));
         if !self.links.is_empty() {
-            try!(serializer.serialize_map_key(&mut state, "_links"));
-            try!(serializer.serialize_map_value(&mut state, &(self.links)));
+            try!(state.serialize_key("_links"));
+            try!(state.serialize_value(&(self.links)));
         }
         if !self.embedded.is_empty() {
-            try!(serializer.serialize_map_key(&mut state, "_embedded"));
-            try!(serializer.serialize_map_value(&mut state, &(self.embedded)));
+            try!(state.serialize_key("_embedded"));
+            try!(state.serialize_value(&(self.embedded)));
         }
         if let Some(map) = map {
             for (k,v) in map {
-                try!(serializer.serialize_map_key(&mut state, k));
-                try!(serializer.serialize_map_value(&mut state, v));
+                try!(state.serialize_key(k));
+                try!(state.serialize_value(v));
             }
         };
 
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
-impl Deserialize for HalResource  {
+impl<'de> Deserialize<'de> for HalResource  {
 
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: Deserializer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de> {
 
         struct ResourceVisitor {
         }
-        
+
         impl ResourceVisitor  {
             fn new() -> Self {
                 ResourceVisitor { }
             }
         }
-        
+
         /// A visitor for deserializing `HalResource` from map representation.
         ///
         /// Implementation deserialize the hal specific keys (_links, _embedded) to maps
         /// as usual, and stores everything else in  a `JsonValue` object.
         /// It then converts the `JsonValue` to the type T
-        impl de::Visitor for ResourceVisitor {
+        impl<'de> de::Visitor<'de> for ResourceVisitor {
 
             type Value = HalResource;
-            
-            fn visit_map<M>(&mut self, mut visitor: M) -> Result<HalResource, M::Error>
-                where M: de::MapVisitor
+            fn expecting(&self, f: &mut Formatter) ->Result<(), FmtError>
+            {
+                Ok(())
+            }
+
+            fn visit_map<M>(self, mut visitor: M) -> Result<HalResource, M::Error>
+                where M: de::MapAccess<'de>
             {
                 //transitory Value to read the data.
                 let mut payload : Map<String, JsonValue> = Map::new();
                 // Dummy resource to collect the links and embedded resources
                 let mut resource: HalResource = HalResource::new(());
-                while let Some (key) = try!(visitor.visit_key::<String>()) {
+                while let Some (key) = try!(visitor.next_key::<String>()) {
                     match key.deref() {
                         "_links" => {
-                            resource.links = try!(visitor.visit_value());
+                            resource.links = try!(visitor.next_value());
                         },
                         "_embedded" => {
-                            resource.embedded = try!(visitor.visit_value());
+                            resource.embedded = try!(visitor.next_value());
                         },
                         _ => {
-                            payload.insert(key, try!(visitor.visit_value()));
+                            payload.insert(key, try!(visitor.next_value()));
                         }
                     }
                 };
-                try!(visitor.end());
+                //try!(visitor.end());
                 resource.data = JsonValue::Object(payload);
                 Ok(resource)
             }
@@ -359,5 +365,3 @@ impl PartialEq for HalResource
         self.get_self() == other.get_self()
     }
 }
-
-

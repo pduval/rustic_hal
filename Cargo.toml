@@ -1,6 +1,6 @@
 [package]
 name = "rustic_hal"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Philippe Duval <philippe@duvalsoft.org>"]
 license = "MIT/Apache-2.0"
 description = "A rust library for creating Hal representations of resources, based on serde"
@@ -12,14 +12,7 @@ build = "build.rs"
 [lib]
 name = "rustic_hal"
 
-[features]
-default = ["serde_codegen"]
-unstable = ["serde_derive"]
-
-[build-dependencies]
-serde_codegen = { version = "0.8", optional = true }
-
 [dependencies]
-serde = "0.8"
-serde_derive = { version = "0.8", optional = true }
-serde_json = "0.8"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"

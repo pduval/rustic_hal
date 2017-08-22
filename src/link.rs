@@ -1,7 +1,9 @@
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
+use serde::ser::SerializeMap;
 use serde::de;
 use std::ops::Deref;
 use std::convert::{From,Into};
+use std::fmt::{Error,Formatter};
 
 /// A Link object for linking HAL Resources.
 ///
@@ -24,7 +26,7 @@ pub struct HalLink {
     /// If the value is a URI Template then the Link Object SHOULD have a
     /// "templated" attribute whose value is true.
     pub href: String,
-    
+
     /// The "templated" property is OPTIONAL.
     ///
     /// Its value is boolean and SHOULD be true when the Link Object's "href"
@@ -50,7 +52,7 @@ pub struct HalLink {
     /// value so that a client manitainer can easily find information about
     /// the deprecation.
     pub deprecation: Option<String>,
-    
+
     /// The "name" property is OPTIONAL.
     ///
     /// Its value MAY be used as a secondary key for selecting Link Objects
@@ -112,7 +114,7 @@ impl HalLink {
     chainable_string!(profile, with_profile);
     chainable_string!(title, with_title);
     chainable_string!(hreflang, with_hreflang);
-    
+
 }
 
 impl<T> From<T> for HalLink
@@ -124,7 +126,7 @@ impl<T> From<T> for HalLink
 }
 
 impl Serialize for HalLink {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
 
@@ -151,45 +153,44 @@ impl Serialize for HalLink {
             len += 1;
         }
         let mut state = try!(serializer.serialize_map(Some(len)));
-        try!(serializer.serialize_map_key(&mut state, "href"));
-        try!(serializer.serialize_map_value(&mut state, &self.href));
+        try!(state.serialize_entry("href", &self.href));
         if self.templated {
-            try!(serializer.serialize_map_key(&mut state, "templated"));
-            try!(serializer.serialize_map_value(&mut state, true));
+            try!(state.serialize_key("templated"));
+            try!(state.serialize_value(&true));
         }
         if let Some(ref s) =  self.media_type {
-            try!(serializer.serialize_map_key(&mut state, "type"));
-            try!(serializer.serialize_map_value(&mut state, s));
+            try!(state.serialize_key("type"));
+            try!(state.serialize_value(s));
         };
         if let Some(ref s) = self.deprecation {
-            try!(serializer.serialize_map_key(&mut state, "deprecation"));
-            try!(serializer.serialize_map_value(&mut state, s));
+            try!(state.serialize_key("deprecation"));
+            try!(state.serialize_value(s));
         };
         if let Some(ref s) = self.profile {
-            try!(serializer.serialize_map_key(&mut state, "profile"));
-            try!(serializer.serialize_map_value(&mut state, s));
+            try!(state.serialize_key("profile"));
+            try!(state.serialize_value(s));
         };
         if let Some(ref s) = self.name {
-            try!(serializer.serialize_map_key(&mut state, "name"));
-            try!(serializer.serialize_map_value(&mut state, s));
+            try!(state.serialize_key("name"));
+            try!(state.serialize_value(s));
         };
         if let Some(ref s) = self.title {
-            try!(serializer.serialize_map_key(&mut state, "title"));
-            try!(serializer.serialize_map_value(&mut state, s));
+            try!(state.serialize_key("title"));
+            try!(state.serialize_value(s));
         };
         if let Some(ref s) =  self.hreflang {
-            try!(serializer.serialize_map_key(&mut state, "hreflang"));
-            try!(serializer.serialize_map_value(&mut state, s));
+            try!(state.serialize_key("hreflang"));
+            try!(state.serialize_value(s));
         };
-        serializer.serialize_map_end(state)
+        state.end()
     }
 }
 
 
-impl Deserialize for HalLink {
+impl<'de> Deserialize<'de> for HalLink {
 
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-        where D: Deserializer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de> {
 
         struct LinkVisitor;
         impl LinkVisitor {
@@ -199,19 +200,19 @@ impl Deserialize for HalLink {
         }
         /// A visitor for deserializing `HalLink` from map representation, ignoring unknown keys,
         /// and allowing missing fields.
-        impl de::Visitor for LinkVisitor {
+        impl<'de> de::Visitor<'de> for LinkVisitor {
 
             type Value = HalLink;
-            
-            fn visit_map<M>(&mut self, mut visitor: M) -> Result<HalLink, M::Error>
-                where M: de::MapVisitor
+
+            fn visit_map<M>(self, mut visitor: M) -> Result<HalLink, M::Error>
+                where M: de::MapAccess<'de>
             {
                 let mut link = HalLink::new("");
-                while let Some (key) = try!(visitor.visit_key::<String>()) {
+                while let Some (key) = try!(visitor.next_key::<String>()) {
                     if key.deref() == "templated" {
-                        link.templated = try!(visitor.visit_value());
+                        link.templated = try!(visitor.next_value());
                     } else {
-                        let value = try!(visitor.visit_value::<String>());
+                        let value = try!(visitor.next_value::<String>());
                         match key.deref() {
                             "href" => link.href = value,
                             "type" => link.media_type = Some(value),
@@ -224,8 +225,14 @@ impl Deserialize for HalLink {
                         }
                     }
                 };
-                try!(visitor.end());
+                //try!(visitor.end());
                 Ok(link)
+            }
+
+            fn expecting(&self, f: &mut Formatter) -> Result<(), Error>
+            {
+                Ok(())
+
             }
         }
 

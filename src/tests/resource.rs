@@ -3,6 +3,11 @@ use serde_json::{to_string, from_str};
 use super::super::HalLink;
 use super::Test1;
 
+//#[derive(Serialize, Deserialize)]
+//struct Test1 {
+//    a: String
+//}
+
 #[test]
 fn check_data_gets_serialized() {
     let f: HalResource = HalResource::new(Test1 { a: "Test".to_string() });
@@ -12,12 +17,12 @@ fn check_data_gets_serialized() {
 
 #[test]
 fn check_link_gets_serialized_without_empty_attributes() {
-    
+
     let mut f: HalResource = HalResource::new(Test1 { a: "Test".to_string() });
     f.with_link("self", "https://self.com");
     let s = to_string(&f).unwrap();
     assert_eq!(s, r#"{"_links":{"self":{"href":"https://self.com"}},"a":"Test"}"#);
-        
+
 }
 
 #[test]
@@ -28,7 +33,7 @@ fn check_link_arrays_get_serialized() {
         .with_link("alfa", "https://self.com/gamma");
     let s = to_string(&f).unwrap();
     assert_eq!(s, r#"{"_links":{"alfa":[{"href":"https://self.com/beta"},{"href":"https://self.com/gamma"}],"self":{"href":"https://self.com"}},"a":"Test"}"#);
-        
+
 }
 
 #[test]
@@ -44,7 +49,7 @@ fn check_links_get_fully_serialized() {
 fn check_embedded_resource_gets_serialized() {
     let mut r1 = HalResource::new(Test1 { a: "Test2".to_string() });
     r1.with_link("self", "https://self2.com");
-    
+
     let mut f = HalResource::new(Test1 { a: "Test".to_string() });
     f.with_link("self", "https://self.com")
         .with_resource(
@@ -65,10 +70,10 @@ fn check_curies_get_serialized_in_links() {
     let s = to_string(&r1).unwrap();
     let target = "{\"_links\":{\"curies\":[{\"href\":\"https://curie.org\",\"templated\":true,\"name\":\"cur\"}],\"self\":{\"href\":\"https://self.com\"}},\"a\":\"Test\"}";
     assert_eq!(s,target);
-        
-    
+
+
  }
-        
+
 #[test]
 fn check_simple_resource_gets_deserialized() {
     let source = r#"{ "_links":{"self":{"href": "https://www.test.com"}}, "a": "123"}"#;
@@ -90,5 +95,4 @@ fn check_extra_fields_get_deserialized() {
     let source = r#"{ "_links":{"self":{"href": "https://www.test.com"}}, "a": "123", "b":456}"#;
     let hal: HalResource = from_str(source).unwrap();
     assert_eq!(hal.get_extra_data::<i32>("b").unwrap() , 456);
-}    
-
+}
