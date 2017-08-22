@@ -4,26 +4,24 @@
 //!
 //! ## Usage
 //!
-//! ### On nightly rust
-//!
 //! Add the dependency to your Cargo.toml:
 //!
 //! ```toml
 //!
 //! [dependencies]
 //! rustic_hal="0.1.0"
-//! serde="0.8"
-//! serde_json="0.8"
-//! serde_derive="0.8"
+//! serde="1.0"
+//! serde_json="1.0"
+//! serde_derive="1.0"
 //!
 //! ```
 //! and to use:
 //!
-// TODO: Figure out why rustdoc can't handle the derive(Serialize) attribute
-//! ```rust,ignore
+//! ```rust
 //! extern crate rustic_hal;
 //! extern crate serde_json;
-//! #[macro_use] extern crate serde;
+//! extern crate serde;
+//! #[macro_use] extern crate serde_derive;
 //!
 //! use rustic_hal::*;
 //! use serde::Serialize;
@@ -50,7 +48,7 @@
 //!
 
 extern crate serde_json;
-#[macro_use] extern crate serde;
+extern crate serde;
 #[macro_use] extern crate serde_derive;
 
 pub mod resource;
