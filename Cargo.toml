@@ -1,6 +1,6 @@
 [package]
 name = "rustic_hal"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Philippe Duval <philippe@duvalsoft.org>"]
 license = "MIT/Apache-2.0"
 description = "A rust library for creating Hal representations of resources, based on serde"
