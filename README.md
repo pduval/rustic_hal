@@ -8,14 +8,14 @@ A simple library for serializing (and deserializing coming soon) resources follo
 
 ## Usage
 
-### On nightly rust
+### On stable rust (>= 1.15)
 
 Add the dependency to your Cargo.toml:
 
 ```toml
 
 [dependencies]
-rustic_hal="0.1.0"
+rustic_hal="0.1"
 serde="1.0"
 serde_json="1.0"
 serde_derive="1.0"
@@ -27,23 +27,27 @@ and to use:
 
 extern crate rustic_hal;
 extern crate serde;
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
 
 use rustic_hal::*;
-use serde::Serialize;
-use serde_json::to_json;
+use serde_json::to_string;
 
 #[derive(Serialize)]
 pub struct MyResource {
-    pub test: String;
+    pub test: String,
 }
 
-let mr = MyResource { test: "Hello, World!".to_string() };
-let mut hal_res = HalResource::new(mr);
-hal_res.add_link("self", "/api/myresource/0");
+fn main() {
+    let mr = MyResource {
+        test: "Hello, World!".to_string(),
+    };
+    let mut hal_res = HalResource::new(mr);
+    hal_res.with_link("self", "/api/myresource/0");
 
-println!("json representation: {}", to_json(hal_res));
+    println!("json representation: {:?}", to_string(&hal_res));
+}
 
 ```
 ## Documentation
