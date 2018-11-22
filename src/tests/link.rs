@@ -1,6 +1,6 @@
 //use serde::de::Deserialize;
-use serde_json::{from_str};
-use super::super::link::{HalLink};
+use super::super::link::HalLink;
+use serde_json::from_str;
 
 #[test]
 fn ensure_href_gets_deserialized() {
@@ -17,7 +17,8 @@ fn ensure_templated_gets_deserialized() {
 
 #[test]
 fn ensure_full_link_gets_deserialized() {
-    let link : HalLink = from_str(r#"
+    let link: HalLink = from_str(
+        r#"
 {
    "href": "https://www.google.com",
    "name": "google",
@@ -25,16 +26,16 @@ fn ensure_full_link_gets_deserialized() {
    "hreflang": "en-US",
    "deprecation": "https://www.google.com/deprecation",
    "title": "Google Search"
-}"#).unwrap();
+}"#,
+    ).unwrap();
 
     assert_eq!(link.href, "https://www.google.com");
     assert_eq!(link.name, Some("google".to_string()));
     assert_eq!(link.templated, false);
     assert_eq!(link.hreflang, Some("en-US".to_string()));
-    assert_eq!(link.deprecation, Some("https://www.google.com/deprecation".to_string()));
+    assert_eq!(
+        link.deprecation,
+        Some("https://www.google.com/deprecation".to_string())
+    );
     assert_eq!(link.title, Some("Google Search".to_string()));
 }
-
-
-
-                                  

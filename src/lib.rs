@@ -47,17 +47,18 @@
 //! This library is heavily inspired by the [hal-rs](https://github.com/hjr3/hal-rs) library by Herman J. Radtke III.
 //!
 
-extern crate serde_json;
 extern crate serde;
-#[macro_use] extern crate serde_derive;
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 
-pub mod resource;
-pub mod link;
 pub mod error;
+pub mod link;
+pub mod resource;
 
-pub use self::resource::HalResource;
-pub use self::link::HalLink;
 pub use self::error::{HalError, HalResult};
+pub use self::link::HalLink;
+pub use self::resource::HalResource;
 
 #[cfg(test)]
 mod tests;
