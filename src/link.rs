@@ -1,9 +1,9 @@
-use serde::{Serialize, Serializer, Deserialize, Deserializer};
-use serde::ser::SerializeMap;
 use serde::de;
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::convert::{From, Into};
+use std::fmt::{Error, Formatter};
 use std::ops::Deref;
-use std::convert::{From,Into};
-use std::fmt::{Error,Formatter};
 
 /// A Link object for linking HAL Resources.
 ///
@@ -90,7 +90,10 @@ macro_rules! chainable_string {
 }
 
 impl HalLink {
-    pub fn new<S>(href: S) -> HalLink where S: Into<String> {
+    pub fn new<S>(href: S) -> HalLink
+    where
+        S: Into<String>,
+    {
         HalLink {
             href: href.into(),
             templated: false,
@@ -114,11 +117,11 @@ impl HalLink {
     chainable_string!(profile, with_profile);
     chainable_string!(title, with_title);
     chainable_string!(hreflang, with_hreflang);
-
 }
 
 impl<T> From<T> for HalLink
-    where T: Into<String>
+where
+    T: Into<String>,
 {
     fn from(s: T) -> Self {
         HalLink::new(s)
@@ -127,9 +130,9 @@ impl<T> From<T> for HalLink
 
 impl Serialize for HalLink {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
-
         let mut len = 1;
         if self.templated {
             len += 1;
@@ -158,7 +161,7 @@ impl Serialize for HalLink {
             try!(state.serialize_key("templated"));
             try!(state.serialize_value(&true));
         }
-        if let Some(ref s) =  self.media_type {
+        if let Some(ref s) = self.media_type {
             try!(state.serialize_key("type"));
             try!(state.serialize_value(s));
         };
@@ -178,7 +181,7 @@ impl Serialize for HalLink {
             try!(state.serialize_key("title"));
             try!(state.serialize_value(s));
         };
-        if let Some(ref s) =  self.hreflang {
+        if let Some(ref s) = self.hreflang {
             try!(state.serialize_key("hreflang"));
             try!(state.serialize_value(s));
         };
@@ -186,12 +189,11 @@ impl Serialize for HalLink {
     }
 }
 
-
 impl<'de> Deserialize<'de> for HalLink {
-
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de> {
-
+    where
+        D: Deserializer<'de>,
+    {
         struct LinkVisitor;
         impl LinkVisitor {
             fn new() -> Self {
@@ -201,14 +203,14 @@ impl<'de> Deserialize<'de> for HalLink {
         /// A visitor for deserializing `HalLink` from map representation, ignoring unknown keys,
         /// and allowing missing fields.
         impl<'de> de::Visitor<'de> for LinkVisitor {
-
             type Value = HalLink;
 
             fn visit_map<M>(self, mut visitor: M) -> Result<HalLink, M::Error>
-                where M: de::MapAccess<'de>
+            where
+                M: de::MapAccess<'de>,
             {
                 let mut link = HalLink::new("");
-                while let Some (key) = try!(visitor.next_key::<String>()) {
+                while let Some(key) = try!(visitor.next_key::<String>()) {
                     if key.deref() == "templated" {
                         link.templated = try!(visitor.next_value());
                     } else {
@@ -219,23 +221,20 @@ impl<'de> Deserialize<'de> for HalLink {
                             "deprecation" => link.deprecation = Some(value),
                             "profile" => link.profile = Some(value),
                             "name" => link.name = Some(value),
-                            "title" =>link.title = Some(value),
+                            "title" => link.title = Some(value),
                             "hreflang" => link.hreflang = Some(value),
-                            &_ => ()
+                            &_ => (),
                         }
                     }
-                };
+                }
                 //try!(visitor.end());
                 Ok(link)
             }
 
-            fn expecting(&self, f: &mut Formatter) -> Result<(), Error>
-            {
+            fn expecting(&self, f: &mut Formatter) -> Result<(), Error> {
                 Ok(())
-
             }
         }
-
 
         deserializer.deserialize_map(LinkVisitor::new())
     }
