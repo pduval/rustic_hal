@@ -58,7 +58,7 @@ where
     }
 
     /// Force to be serialized as array, even if only one element
-    pub fn force_many(&mut self) -> &mut Self {
+    pub fn force_many(mut self) -> Self {
         self.force_many = true;
         self
     }
@@ -184,9 +184,11 @@ impl HalResource {
             Entry::Vacant(entry) => {
                 let mut lk = OneOrMany::new();
 
-                if lk_name == "curies" {
-                    lk.force_many();
-                }
+                let mut lk = match lk_name.as_ref() {
+                    "curies" => lk.force_many(),
+                    _ => lk,
+                };
+
                 lk.push(&(link.into()));
                 entry.insert(lk);
             }
@@ -229,6 +231,27 @@ impl HalResource {
             Entry::Occupied(mut entry) => {
                 let mut content = entry.get_mut(); //&mut HalLinks
                 content.push(&resource.clone());
+            }
+        }
+        self
+    }
+
+    pub fn with_resources(&mut self, name: &str, resources: Vec<&HalResource>) -> &mut Self {
+        match self.embedded.entry(name.to_string()) {
+            Entry::Vacant(entry) => {
+                let mut _resources = OneOrMany::new().force_many();
+
+                for resource in resources.iter() {
+                    _resources.push(resource.clone())
+                }
+                entry.insert(_resources.clone());
+            }
+            Entry::Occupied(mut entry) => {
+                let mut content = entry.get_mut(); //&mut HalLinks
+
+                for resource in resources.iter() {
+                    content.push(&resource.clone());
+                }
             }
         }
         self
