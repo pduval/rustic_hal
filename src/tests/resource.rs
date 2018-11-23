@@ -69,7 +69,7 @@ fn check_embedded_resource_gets_serialized() {
         a: "Test".to_string(),
     });
     f.with_link("self", "https://self.com")
-        .with_resource("child", &r1);
+        .with_resource("child", r1);
 
     let s = to_string(&f).unwrap();
     let target = "{\"_links\":{\"self\":{\"href\":\"https://self.com\"}},\"_embedded\":{\"child\":{\"_links\":{\"self\":{\"href\":\"https://self2.com\"}},\"a\":\"Test2\"}},\"a\":\"Test\"}";

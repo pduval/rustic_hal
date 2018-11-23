@@ -221,36 +221,36 @@ impl HalResource {
         }
     }
 
-    pub fn with_resource(&mut self, name: &str, resource: &HalResource) -> &mut Self {
+    pub fn with_resource(&mut self, name: &str, resource: HalResource) -> &mut Self {
         match self.embedded.entry(name.to_string()) {
             Entry::Vacant(entry) => {
                 let mut resources = OneOrMany::new();
-                resources.push(&resource.clone());
+                resources.push(&resource);
                 entry.insert(resources);
             }
             Entry::Occupied(mut entry) => {
                 let mut content = entry.get_mut(); //&mut HalLinks
-                content.push(&resource.clone());
+                content.push(&resource);
             }
         }
         self
     }
 
-    pub fn with_resources(&mut self, name: &str, resources: Vec<&HalResource>) -> &mut Self {
+    pub fn with_resources(&mut self, name: &str, resources: Vec<HalResource>) -> &mut Self {
         match self.embedded.entry(name.to_string()) {
             Entry::Vacant(entry) => {
                 let mut _resources = OneOrMany::new().force_many();
 
                 for resource in resources.iter() {
-                    _resources.push(resource.clone())
+                    _resources.push(resource)
                 }
-                entry.insert(_resources.clone());
+                entry.insert(_resources);
             }
             Entry::Occupied(mut entry) => {
                 let mut content = entry.get_mut(); //&mut HalLinks
 
                 for resource in resources.iter() {
-                    content.push(&resource.clone());
+                    content.push(&resource);
                 }
             }
         }
