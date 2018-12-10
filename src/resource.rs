@@ -102,7 +102,7 @@ where
     where
         S: Serializer,
     {
-        if self.is_empty() {
+        if self.is_empty() && !self.force_many {
             ().serialize(serializer)
         } else if self.len() == 1 && !self.force_many {
             self.single().serialize(serializer)
