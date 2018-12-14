@@ -1,10 +1,11 @@
-use super::super::resource::*;
-use super::super::HalLink;
-use super::Test1;
+use super::{
+    super::{resource::*, HalLink},
+    Test1,
+};
 use serde_json::{from_str, to_string};
 
 //#[derive(Serialize, Deserialize)]
-//struct Test1 {
+// struct Test1 {
 //    a: String
 //}
 
@@ -111,4 +112,13 @@ fn check_extra_fields_get_deserialized() {
     let source = r#"{ "_links":{"self":{"href": "https://www.test.com"}}, "a": "123", "b":456}"#;
     let hal: HalResource = from_str(source).unwrap();
     assert_eq!(hal.get_extra_data::<i32>("b").unwrap(), 456);
+}
+
+#[test]
+fn check_force_many_serializes_to_empty_array_if_empty_resources() {
+    let mut resource = HalResource::new("");
+    resource.with_resources("empty_array", Vec::new());
+
+    let s = to_string(&resource).unwrap();
+    assert_eq!(s, r#"{"_embedded":{"empty_array":[]}}"#);
 }
