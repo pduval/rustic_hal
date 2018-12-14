@@ -20,10 +20,9 @@ fn check_data_gets_serialized() {
 
 #[test]
 fn check_link_gets_serialized_without_empty_attributes() {
-    let mut f: HalResource = HalResource::new(Test1 {
+    let f = HalResource::new(Test1 {
         a: "Test".to_string(),
-    });
-    f.with_link("self", "https://self.com");
+    }).with_link("self", "https://self.com");
     let s = to_string(&f).unwrap();
     assert_eq!(
         s,
@@ -33,27 +32,26 @@ fn check_link_gets_serialized_without_empty_attributes() {
 
 #[test]
 fn check_link_arrays_get_serialized() {
-    let mut f: HalResource = HalResource::new(Test1 {
+    let f = HalResource::new(Test1 {
         a: "Test".to_string(),
-    });
-    f.with_link("self", "https://self.com")
-        .with_link("alfa", "https://self.com/beta")
-        .with_link("alfa", "https://self.com/gamma");
+    }).with_link("self", "https://self.com")
+      .with_link("alfa", "https://self.com/beta")
+      .with_link("alfa", "https://self.com/gamma");
+
     let s = to_string(&f).unwrap();
     assert_eq!(s, r#"{"_links":{"alfa":[{"href":"https://self.com/beta"},{"href":"https://self.com/gamma"}],"self":{"href":"https://self.com"}},"a":"Test"}"#);
 }
 
 #[test]
 fn check_links_get_fully_serialized() {
-    let mut f: HalResource = HalResource::new(Test1 {
+    let f = HalResource::new(Test1 {
         a: "Test".to_string(),
-    });
-    f.with_link(
+    }).with_link(
         "self",
         HalLink::new("https://self.com")
             .with_title("Self Link")
             .with_name("moi")
-            .with_deprecation("http://explain.com/why"),
+            .with_deprecation("http://explain.com/why")
     );
     let s = to_string(&f).unwrap();
     assert_eq!(s, "{\"_links\":{\"self\":{\"href\":\"https://self.com\",\"deprecation\":\"http://explain.com/why\",\"name\":\"moi\",\"title\":\"Self Link\"}},\"a\":\"Test\"}");
@@ -61,16 +59,14 @@ fn check_links_get_fully_serialized() {
 
 #[test]
 fn check_embedded_resource_gets_serialized() {
-    let mut r1 = HalResource::new(Test1 {
+    let r1 = HalResource::new(Test1 {
         a: "Test2".to_string(),
-    });
-    r1.with_link("self", "https://self2.com");
+    }).with_link("self", "https://self2.com");
 
-    let mut f = HalResource::new(Test1 {
+    let f = HalResource::new(Test1 {
         a: "Test".to_string(),
-    });
-    f.with_link("self", "https://self.com")
-        .with_resource("child", r1);
+    }).with_link("self", "https://self.com")
+      .with_resource("child", r1);
 
     let s = to_string(&f).unwrap();
     let target = "{\"_links\":{\"self\":{\"href\":\"https://self.com\"}},\"_embedded\":{\"child\":{\"_links\":{\"self\":{\"href\":\"https://self2.com\"}},\"a\":\"Test2\"}},\"a\":\"Test\"}";
@@ -79,11 +75,10 @@ fn check_embedded_resource_gets_serialized() {
 
 #[test]
 fn check_curies_get_serialized_in_links() {
-    let mut r1 = HalResource::new(Test1 {
+    let r1 = HalResource::new(Test1 {
         a: "Test".to_string(),
-    });
-    r1.with_curie("cur", "https://curie.org")
-        .with_link("self", "https://self.com");
+    }).with_curie("cur", "https://curie.org")
+      .with_link("self", "https://self.com");
     let s = to_string(&r1).unwrap();
     let target = "{\"_links\":{\"curies\":[{\"href\":\"https://curie.org\",\"templated\":true,\"name\":\"cur\"}],\"self\":{\"href\":\"https://self.com\"}},\"a\":\"Test\"}";
     assert_eq!(s, target);
@@ -98,11 +93,10 @@ fn check_simple_resource_gets_deserialized() {
 
 #[test]
 fn check_extra_fields_get_serialized() {
-    let mut f: HalResource = HalResource::new(Test1 {
+    let f = HalResource::new(Test1 {
         a: "Test".to_string(),
-    });
-    f.with_extra_data("int", 123);
-    f.with_extra_data("string", "Hello!?");
+    }).with_extra_data("int", 123)
+      .with_extra_data("string", "Hello!?");
     let s = to_string(&f).unwrap();
     assert_eq!(s, r#"{"a":"Test","int":123,"string":"Hello!?"}"#);
 }
@@ -116,8 +110,7 @@ fn check_extra_fields_get_deserialized() {
 
 #[test]
 fn check_force_many_serializes_to_empty_array_if_empty_resources() {
-    let mut resource = HalResource::new("");
-    resource.with_resources("empty_array", Vec::new());
+    let resource = HalResource::new("").with_resources("empty_array", Vec::new());
 
     let s = to_string(&resource).unwrap();
     assert_eq!(s, r#"{"_embedded":{"empty_array":[]}}"#);

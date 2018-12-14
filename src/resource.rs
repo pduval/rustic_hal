@@ -116,7 +116,9 @@ where
     where
         D: Deserializer<'de>,
     {
-        let value: JsonValue = try!(Deserialize::deserialize(deserializer));
+
+
+        let value: JsonValue = Deserialize::deserialize(deserializer)?;
         let v2 = value.clone();
         match v2 {
             JsonValue::Object(_) => {
@@ -192,7 +194,7 @@ impl HalResource {
         }
     }
 
-    pub fn with_link<S, L>(&mut self, name: S, link: L) -> &mut Self
+    pub fn with_link<S, L>(mut self, name: S, link: L) -> Self
     where
         S: Into<String>,
         L: Into<HalLink>,
@@ -239,7 +241,7 @@ impl HalResource {
         }
     }
 
-    pub fn with_resource(&mut self, name: &str, resource: HalResource) -> &mut Self {
+    pub fn with_resource(mut self, name: &str, resource: HalResource) -> Self {
         match self.embedded.entry(name.to_string()) {
             Entry::Vacant(entry) => {
                 let mut resources = OneOrMany::new();
@@ -254,7 +256,7 @@ impl HalResource {
         self
     }
 
-    pub fn with_resources(&mut self, name: &str, resources: Vec<HalResource>) -> &mut Self {
+    pub fn with_resources(mut self, name: &str, resources: Vec<HalResource>) -> Self {
         match self.embedded.entry(name.to_string()) {
             Entry::Vacant(entry) => {
                 let mut _resources = OneOrMany::new().force_many();
@@ -275,12 +277,11 @@ impl HalResource {
         self
     }
 
-    pub fn with_curie(&mut self, name: &str, href: &str) -> &mut Self {
-        self.with_link("curies", HalLink::new(href).templated(true).with_name(name));
-        self
+    pub fn with_curie(self, name: &str, href: &str) -> Self {
+        self.with_link("curies", HalLink::new(href).templated(true).with_name(name))
     }
 
-    pub fn with_extra_data<V>(&mut self, name: &str, value: V) -> &mut Self
+    pub fn with_extra_data<V>(mut self, name: &str, value: V) -> Self
     where
         V: Serialize,
     {
@@ -325,10 +326,6 @@ impl HalResource {
 impl PartialEq for HalResource {
     fn eq(&self, other: &HalResource) -> bool {
         self.get_self() == other.get_self()
-    }
-}
-
-        }
     }
 }
 
