@@ -27,7 +27,8 @@ fn ensure_full_link_gets_deserialized() {
    "deprecation": "https://www.google.com/deprecation",
    "title": "Google Search"
 }"#,
-    ).unwrap();
+    )
+    .unwrap();
 
     assert_eq!(link.href, "https://www.google.com");
     assert_eq!(link.name, Some("google".to_string()));

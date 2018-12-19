@@ -1,9 +1,4 @@
-use serde::de;
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::convert::{From, Into};
-use std::fmt::{Error, Formatter};
-use std::ops::Deref;
 
 /// A Link object for linking HAL Resources.
 ///
@@ -17,7 +12,7 @@ use std::ops::Deref;
 ///
 /// let link = HalLink::new("http://sowewhere.com");
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct HalLink {
     /// The "href" property is REQUIRED.
     ///
@@ -34,11 +29,13 @@ pub struct HalLink {
     ///
     /// Its value SHOULD be considered false if it is undefined or any other
     /// value than true.
+    #[serde(skip_serializing_if = "is_not", default)]
     pub templated: bool,
     /// The "type" property is OPTIONAL.
     ///
     /// Its value is a string used as a hint to indicate the media type
     /// expected when dereferencing the target resource.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub media_type: Option<String>,
     /// The "deprecation" property is OPTIONAL.
     ///
@@ -51,31 +48,39 @@ pub struct HalLink {
     /// property.  The notification SHOULD include the deprecation property's
     /// value so that a client manitainer can easily find information about
     /// the deprecation.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub deprecation: Option<String>,
 
     /// The "name" property is OPTIONAL.
     ///
     /// Its value MAY be used as a secondary key for selecting Link Objects
     /// which share the same relation type.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 
     /// The "profile" property is OPTIONAL.
     ///
     /// Its value is a string which is a URI that hints about the profile (as
     /// defined by [I-D.wilde-profile-link]) of the target resource.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<String>,
     /// The "title" property is OPTIONAL.
     ///
     /// Its value is a string and is intended for labelling the link with a
     /// human-readable identifier (as defined by [RFC5988]).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     /// The "hreflang" property is OPTIONAL.
     ///
     /// Its value is a string and is intended for indicating the language of
     /// the target resource (as defined by [RFC5988]).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hreflang: Option<String>,
 }
 
+fn is_not(b: &bool) -> bool {
+    !*b
+}
 macro_rules! chainable_string {
     ($x: ident, $y: ident) => {
         pub fn $y(mut self, $x: &str) -> Self {
@@ -125,118 +130,6 @@ where
 {
     fn from(s: T) -> Self {
         HalLink::new(s)
-    }
-}
-
-impl Serialize for HalLink {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut len = 1;
-        if self.templated {
-            len += 1;
-        }
-        if self.media_type.is_some() {
-            len += 1;
-        }
-        if self.deprecation.is_some() {
-            len += 1;
-        }
-        if self.profile.is_some() {
-            len += 1;
-        }
-        if self.name.is_some() {
-            len += 1;
-        }
-        if self.title.is_some() {
-            len += 1;
-        }
-        if self.hreflang.is_some() {
-            len += 1;
-        }
-        let mut state = try!(serializer.serialize_map(Some(len)));
-        try!(state.serialize_entry("href", &self.href));
-        if self.templated {
-            try!(state.serialize_key("templated"));
-            try!(state.serialize_value(&true));
-        }
-        if let Some(ref s) = self.media_type {
-            try!(state.serialize_key("type"));
-            try!(state.serialize_value(s));
-        };
-        if let Some(ref s) = self.deprecation {
-            try!(state.serialize_key("deprecation"));
-            try!(state.serialize_value(s));
-        };
-        if let Some(ref s) = self.profile {
-            try!(state.serialize_key("profile"));
-            try!(state.serialize_value(s));
-        };
-        if let Some(ref s) = self.name {
-            try!(state.serialize_key("name"));
-            try!(state.serialize_value(s));
-        };
-        if let Some(ref s) = self.title {
-            try!(state.serialize_key("title"));
-            try!(state.serialize_value(s));
-        };
-        if let Some(ref s) = self.hreflang {
-            try!(state.serialize_key("hreflang"));
-            try!(state.serialize_value(s));
-        };
-        state.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for HalLink {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct LinkVisitor;
-        impl LinkVisitor {
-            fn new() -> Self {
-                LinkVisitor {}
-            }
-        }
-        /// A visitor for deserializing `HalLink` from map representation, ignoring unknown keys,
-        /// and allowing missing fields.
-        impl<'de> de::Visitor<'de> for LinkVisitor {
-            type Value = HalLink;
-
-            fn visit_map<M>(self, mut visitor: M) -> Result<HalLink, M::Error>
-            where
-                M: de::MapAccess<'de>,
-            {
-                let mut link = HalLink::new("");
-                while let Some(key) = try!(visitor.next_key::<String>()) {
-                    if key.deref() == "templated" {
-                        link.templated = try!(visitor.next_value());
-                    } else {
-                        let value = try!(visitor.next_value::<String>());
-                        match key.deref() {
-                            "href" => link.href = value,
-                            "type" => link.media_type = Some(value),
-                            "deprecation" => link.deprecation = Some(value),
-                            "profile" => link.profile = Some(value),
-                            "name" => link.name = Some(value),
-                            "title" => link.title = Some(value),
-                            "hreflang" => link.hreflang = Some(value),
-                            &_ => (),
-                        }
-                    }
-                }
-                //try!(visitor.end());
-                Ok(link)
-            }
-
-            fn expecting(&self, f: &mut Formatter) -> Result<(), Error> {
-                Ok(())
-            }
-        }
-
-        deserializer.deserialize_map(LinkVisitor::new())
     }
 }
 
