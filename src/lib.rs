@@ -34,8 +34,7 @@
 //!
 //! # fn main() {
 //! let mr = MyResource { test: "Hello, World!".to_string() };
-//! let mut hal_res = HalResource::new(mr);
-//! hal_res.with_link("self", "/api/myresource/0");
+//! let hal_res = HalResource::new(mr).with_link("self", "/api/myresource/0");
 //!
 //! println!("json representation: {}", to_string(&hal_res).unwrap());
 //!
