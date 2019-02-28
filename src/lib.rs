@@ -9,7 +9,7 @@
 //! ```toml
 //!
 //! [dependencies]
-//! rustic_hal="0.1.0"
+//! rustic_hal="0.2.0"
 //! serde="1.0"
 //! serde_json="1.0"
 //! serde_derive="1.0"

@@ -15,7 +15,7 @@ Add the dependency to your Cargo.toml:
 ```toml
 
 [dependencies]
-rustic_hal="0.1"
+rustic_hal="0.2"
 serde="1.0"
 serde_json="1.0"
 serde_derive="1.0"
@@ -43,9 +43,7 @@ fn main() {
     let mr = MyResource {
         test: "Hello, World!".to_string(),
     };
-    let mut hal_res = HalResource::new(mr);
-    hal_res.with_link("self", "/api/myresource/0");
-
+    let hal_res = HalResource::new(mr).with_link("self", "/api/myresource/0");
     println!("json representation: {:?}", to_string(&hal_res));
 }
 
@@ -58,6 +56,3 @@ see [https://pduval.github.io/rustic_hal/rustic_hal/](https://pduval.github.io/r
 
 This library is heavily inspired by (read copied from) the [hal-rs](https://github.com/hjr3/hal-rs) library by Herman J. Radtke III.
 
-## Warnings
-
-I have only very recently started learning Rust, so the idiomatic quality of  this code is probably very low.
