@@ -35,7 +35,7 @@ use serde_json::{from_value, to_value, Map, Value as JsonValue};
 /// assert_eq!(to_string(&v).unwrap(), r#"[{"href":"http://test.com"},{"href":"http://test2.com"}]"#);
 /// # }
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct OneOrMany<T> {
     force_many: bool,
     content: Vec<T>,
@@ -88,6 +88,12 @@ where
     pub fn push(&mut self, newval: &T) {
         self.content.push(newval.clone());
     }
+
+    /// Adds an element to the vector in a chainable way
+    pub fn with(mut self, newval: &T) -> Self {
+        self.content.push(newval.clone());
+        self
+    }
 }
 
 impl<T> Serialize for OneOrMany<T>
@@ -123,7 +129,7 @@ where
         match v2 {
             JsonValue::Object(_) => {
                 let obj: T = match from_value(value) {
-                    Ok(v) => from_value(v).unwrap(),
+                    Ok(v) => v,
                     Err(e) => return Err(D::Error::custom(format!("JSON Error: {:?}", e))),
                 };
                 let mut res = OneOrMany::new();
@@ -139,7 +145,15 @@ where
                 res.content = obj;
                 Ok(res)
             }
-            _ => Ok(OneOrMany::new()),
+            _ => {
+                let obj: T = match from_value(value) {
+                    Ok(v) => v,
+                    Err(e) => return Err(D::Error::custom(format!("JSON Error: {:?}", e)))
+                };
+                let mut res = OneOrMany::new();
+                res.push(&obj);
+                Ok(res)
+            }
         }
     }
 }
