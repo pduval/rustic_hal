@@ -5,7 +5,6 @@ extern crate rustic_hal;
 extern crate serde_json;
 
 use rustic_hal::resource::*;
-use rustic_hal::HalLink;
 use serde_json::{from_str, to_string};
 
 use criterion::Criterion;

@@ -12,7 +12,7 @@ fn ensure_href_gets_deserialized() {
 fn ensure_templated_gets_deserialized() {
     let link: HalLink = from_str(r#"{"href":"https://test.com","templated":true}"#).unwrap();
     assert_eq!(link.href, "https://test.com");
-    assert_eq!(link.templated, true);
+    assert!(link.templated);
 }
 
 #[test]
@@ -32,7 +32,7 @@ fn ensure_full_link_gets_deserialized() {
 
     assert_eq!(link.href, "https://www.google.com");
     assert_eq!(link.name, Some("google".to_string()));
-    assert_eq!(link.templated, false);
+    assert!(!link.templated);
     assert_eq!(link.hreflang, Some("en-US".to_string()));
     assert_eq!(
         link.deprecation,

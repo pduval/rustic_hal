@@ -1,5 +1,4 @@
 //use serde::de::Deserialize;
-use super::super::link::HalLink;
 use super::super::resource::OneOrMany;
 use serde_json::{from_str, to_string};
 use serde::*;

@@ -45,12 +45,6 @@
 //!
 //! This library is heavily inspired by the [hal-rs](https://github.com/hjr3/hal-rs) library by Herman J. Radtke III.
 //!
-
-extern crate serde;
-extern crate serde_json;
-#[macro_use]
-extern crate serde_derive;
-
 pub mod error;
 pub mod link;
 pub mod resource;

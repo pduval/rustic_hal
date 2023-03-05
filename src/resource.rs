@@ -41,6 +41,12 @@ pub struct OneOrMany<T> {
     content: Vec<T>,
 }
 
+impl<T: Sized + Clone> Default for OneOrMany<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> OneOrMany<T>
 where
     T: Sized + Clone,
@@ -216,7 +222,7 @@ impl HalResource {
         let lk_name = name.into();
         match self.links.entry(lk_name.clone()) {
             Entry::Vacant(entry) => {
-                let mut lk = OneOrMany::new();
+                let lk = OneOrMany::new();
 
                 let mut lk = match lk_name.as_ref() {
                     "curies" => lk.force_many(),
@@ -227,7 +233,7 @@ impl HalResource {
                 entry.insert(lk);
             }
             Entry::Occupied(mut entry) => {
-                let mut content = entry.get_mut(); //&mut HalLinks
+                let content = entry.get_mut(); //&mut HalLinks
                 content.push(&(link.into()));
             }
         }
@@ -263,7 +269,7 @@ impl HalResource {
                 entry.insert(resources);
             }
             Entry::Occupied(mut entry) => {
-                let mut content = entry.get_mut(); //&mut HalLinks
+                let content = entry.get_mut(); //&mut HalLinks
                 content.push(&resource);
             }
         }
@@ -281,10 +287,10 @@ impl HalResource {
                 entry.insert(_resources);
             }
             Entry::Occupied(mut entry) => {
-                let mut content = entry.get_mut(); //&mut HalLinks
+                let content = entry.get_mut(); //&mut HalLinks
 
                 for resource in resources.iter() {
-                    content.push(&resource);
+                    content.push(resource);
                 }
             }
         }
@@ -321,7 +327,7 @@ impl HalResource {
             _ => return Err(HalError::Custom("Invalid payload".to_string())),
         };
         match data.get(name) {
-            Some(v) => from_value::<V>(v.clone()).or_else(|e| Err(HalError::Json(e))),
+            Some(v) => from_value::<V>(v.clone()).map_err(HalError::Json),
             None => Err(HalError::Custom(format!("Key {} missing in payload", name))),
         }
     }
@@ -331,7 +337,7 @@ impl HalResource {
         for<'de> V: Deserialize<'de>,
     {
         match self.data {
-            Some(ref val) => from_value::<V>(val.clone()).or_else(|e| Err(HalError::Json(e))),
+            Some(ref val) => from_value::<V>(val.clone()).map_err(HalError::Json),
             None => Err(HalError::Custom("No value".to_owned())),
         }
     }
@@ -342,4 +348,102 @@ impl PartialEq for HalResource {
         self.get_self() == other.get_self()
     }
 }
+
+#[cfg(feature = "actix-web")]
+mod actix {
+
+    use super::HalResource;
+    use actix_web::{HttpRequest, HttpResponse, Responder};
+    use actix_web::body::BoxBody;
+
+    impl Responder for HalResource {
+        type Body = BoxBody;
+        //type Error = Error;
+        //type Future = Ready<Result<HttpResponse, Error>>;
+
+        fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
+            let body = serde_json::to_string(&self).unwrap();
+
+            // Create response and set content type
+            HttpResponse::Ok()
+                .content_type("application/hal+json; charset=utf-8")
+                .body(body)
+        }
+    }
+
+    impl From<HalResource> for HttpResponse {
+        fn from(resource: HalResource) -> Self {
+            if let Ok(res) = serde_json::to_string(&resource) {
+                HttpResponse::Ok()
+                    .content_type("application/hal+json; charset=utf-8")
+                    .body(res)
+            } else {
+                HttpResponse::InternalServerError()
+                    .content_type("application/hal+json; charset=utf-8")
+                    .body("{\"error\":\"Internal Server Error\"}")
+            }
+        }
+    }
+}
+
+#[cfg(feature = "actix-web")]
+pub use self::actix::*;
+
+#[cfg(feature = "axumweb")]
+mod axum {
+    use axum::{http::{StatusCode, header}, response::{Response, IntoResponse}, body};
+    use super::HalResource;
+
+
+    impl IntoResponse for HalResource {
+        fn into_response(self) -> Response {
+            if let Ok(res) = serde_json::to_string_pretty(&self) {
+                let body = body::boxed(body::Full::from(res));
+                Response::builder().status(200).header(header::CONTENT_TYPE, "application/hal+json; charset=urf-8").body(body).unwrap()
+            } else {
+                let body = body::boxed(body::Full::from(r#"{ "success": false, "error": "Invalid response" }"#.to_string()));
+                Response::builder().status(500).header(header::CONTENT_TYPE, "application/hal+json; charset=urf-8").body(body).unwrap()
+            }
+        }
+    }
+
+
+}
+
+#[cfg(feature = "warp-reply")]
+mod warp {
+
+    use super::HalResource;
+    use warp::{Reply };
+    use serde_json::to_string;
+    use http::header::{HeaderValue, CONTENT_TYPE};
+    use warp::http::{StatusCode };
+    use warp::reply::Response;
+
+    impl Reply for HalResource {
+        fn into_response(self) -> Response {
+            if let Ok(s) = to_string(&self) {
+                let mut response = Response::new(s.into());
+                response.headers_mut().insert(
+                    CONTENT_TYPE,
+                    HeaderValue::from_static("text/json; charset=utf-8")
+                );
+                response
+            } else {
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                // let mut response = Response::new("Error serializing resource".into());
+                // response.headers_mut().insert(
+                //     CONTENT_TYPE,
+                //     HeaderValue::from_static("text/plain; charset=utf-8"),
+                // );
+                // response.set_status(StatusCode::InternalServerError);
+                // response
+            }
+        }
+    }
+
+}
+
+#[cfg(feature = "warp-reply")]
+pub use self::warp::*;
 

@@ -1,4 +1,5 @@
 use std::convert::{From, Into};
+use serde::{Serialize, Deserialize};
 
 /// A Link object for linking HAL Resources.
 ///
