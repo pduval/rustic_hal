@@ -391,7 +391,7 @@ pub use self::actix::*;
 
 #[cfg(feature = "axumweb")]
 mod axum {
-    use axum::{http::{StatusCode, header}, response::{Response, IntoResponse}, body};
+    use axum::{http::{header}, response::{Response, IntoResponse}, body};
     use super::HalResource;
 
 
