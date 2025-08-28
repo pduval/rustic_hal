@@ -48,6 +48,7 @@
 pub mod error;
 pub mod link;
 pub mod resource;
+pub mod macros;
 
 pub use self::error::{HalError, HalResult};
 pub use self::link::HalLink;
